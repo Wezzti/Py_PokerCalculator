@@ -1,0 +1,15 @@
+Each player is given two cards directly and not one each two times
+
+In find_winner, only if there is one winner does it work
+
+In player.scores:
+	Best hand is a list of cards
+	Score is an integer
+	Highest Rank is an integer
+	Kickers is a list
+
+
+
+Working on Kickers:
+	Kickers are the cards in my hand that is not part of the combo? How do I program this? I don't know what was in the combo.
+
