@@ -8,16 +8,6 @@ from Features.Statics import *
 import time
 
 
-def get_prob():
-    my_prob = Game(players, my_cards, board_cards, my_turn, nr_of_players, runs)
-    recalculate = False
-    print("Your probability to win is: {} \n".format(my_prob))
-
-    for player in players:
-        player.wins = 0
-    return recalculate
-
-
 def handle_actions():
     lock.acquire()
     done = actions_done
@@ -38,17 +28,19 @@ def handle_actions():
                     participant.inRound = False
                     # -----
                     # Or does it?
-                    print("Player called")
+                    print("Player: " + str(index) + " called")
 
                 case "Fold":
                     pending.pop(0)
                     participant.set_ingame(False)
-                    print("Player folded")
+                    print("Player: " + str(index) + " folded")
 
                 case "Raise" | "Bet" | "AllIn":
 
                     # Branch this
-                    raised = float(input("Player: " + str(index + 1) + " raised by? \n"))
+                    print("Player: " + str(index) + " raised")
+                    #raised = float(input("Player: " + str(index) + " raised by? \n"))
+                    raised = 1
                     pending.pop(0)
                     for opponent in [opponent for opponent in players if opponent.inGame]:
                         opponent.inRound = True
@@ -81,10 +73,16 @@ vision = Vision()
 localizer = Localizer()
 
 # Get player positions
-#while True:
-#    players_pos = localizer.get_players(display=True)
-players_pos = [(928, 769, 1060, 801), (295, 581, 433, 613), (340, 264, 476, 296), (852, 168, 979, 197), (1444, 266, 1570, 297), (1486, 584, 1611, 614)]
 
+# players_pos = localizer.get_players(display=True)
+players_pos = [
+    (928, 769, 1060, 801),
+    (295, 581, 433, 613),
+    (340, 264, 476, 296),
+    (852, 168, 979, 197),
+    (1444, 266, 1570, 297),
+    (1486, 584, 1611, 614)
+]
 
 nr_of_players = int(config["game"]["nr_players"])
 dealer_pos = localizer.get_dealer(display=False)
@@ -101,7 +99,7 @@ ranks = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
 actions = ["c", "f", "r"]
 
 # Set my values
-ante = int(config["game"]["ante"])
+ante = float(config["game"]["ante"])
 nr_of_players = int(config["game"]["nr_players"])
 if debug:
     cash = 100
@@ -143,7 +141,7 @@ for stage in stages:
                 continue
 
             # If it's my turn, wait for threading to be done and then...
-            if index == my_turn:
+            if index == my_turn+10:
                 lock.acquire()
                 while actions:
                     lock.release()
@@ -151,12 +149,13 @@ for stage in stages:
                     lock.acquire()
                 lock.release()
                 reaction = (input("What you do?: \n"))
-                print(reaction)
-
+                if reaction == "f":
+                    player.inGame = False
+                    player.inRound = False
 
             else:
                 # Get that player's action
-                choice = localizer.get_action(player.location)
+                choice = localizer.get_action(player.location, threshold=0.85)
                 lock.acquire()
                 actions.append((choice, player))
                 lock.release()
@@ -166,3 +165,5 @@ for stage in stages:
 
     if stage == "Showdown":
         a = 1
+
+    time.sleep(2)

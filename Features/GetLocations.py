@@ -105,7 +105,7 @@ class Localizer:
             if len(suits) == len(locations):
                 return suits
 
-    def get_action(self, location, method=cv.TM_CCOEFF_NORMED):
+    def get_action(self, location, threshold=0.85, method=cv.TM_CCOEFF_NORMED):
         while True:
             img = self.vision.window_capture()
             above_money = self.vision.snip_screen(img, (location[0], location[1] - 60), (location[2], location[3] - 30))
@@ -115,7 +115,7 @@ class Localizer:
 
                 result = cv.matchTemplate(above_money, needle_img, method)
                 min_val, max_val, min_loc, max_loc = cv.minMaxLoc(result)
-                if max_val < 0.72:
+                if max_val < threshold:
                     continue
                 else:
                     return action.replace(".jpg", "")
