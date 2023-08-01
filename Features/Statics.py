@@ -63,7 +63,8 @@ def sort_players(players_pos, dealer_pos, nr_of_players):
 
     # Sort players so that starter is always 0
     jump = nr_of_players - starter_ind
-    players_sorted = [players_sorted[(0 + jump) % nr_of_players], players_sorted[(1 + jump) % nr_of_players],
+    players_sorted = [players_sorted[(0 + jump) % nr_of_players],
+                      players_sorted[(1 + jump) % nr_of_players],
                       players_sorted[(2 + jump) % nr_of_players],
                       players_sorted[(3 + jump) % nr_of_players],
                       players_sorted[(4 + jump) % nr_of_players],

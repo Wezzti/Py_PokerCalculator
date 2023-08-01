@@ -5,7 +5,7 @@ import cv2 as cv
 from configparser import ConfigParser
 
 
-class Localizer:
+class Detector:
     # Config
     config = ConfigParser()
     config.read('AppConfig.ini')
@@ -14,7 +14,7 @@ class Localizer:
     displayed_ranks = np.array([1337, 50052])
     div_folder = config["paths"]["div"]
 
-    def get_board(self, display=False):
+    def get_board(self, display=False, threshold=0.82):
         # Function check for cards, shown as saved in Rank folder.
         # Optimal parameter to limited search area.
 
@@ -35,7 +35,7 @@ class Localizer:
                 # Also, location is saved in order to display if so desired
                 img = self.vision.window_capture()
 
-                rank_locs = self.vision.match(img, rank_dir + '/{}'.format(image), 0.82, top_left=top_left,
+                rank_locs = self.vision.match(img, rank_dir + '/{}'.format(image), threshold, top_left=top_left,
                                               bottom_right=bottom_right, exclude=False)
 
                 suits = self.get_suits(img, rank_locs)
@@ -109,6 +109,10 @@ class Localizer:
         while True:
             img = self.vision.window_capture()
             above_money = self.vision.snip_screen(img, (location[0], location[1] - 60), (location[2], location[3] - 30))
+
+            # Trying to figure out why the vision ain't working. Remove at convenience.
+            self.vision.display(np.array([[location[0], location[1] - 60], [location[2], location[3] - 30]]))
+
             action_dir = self.config['paths']['action']
             for action in os.listdir(action_dir):
                 needle_img = cv.imread(action_dir + '/{}'.format(action), method)
@@ -122,15 +126,6 @@ class Localizer:
 
     # Returns collection of (top_left_x, top_left_y, bottom_right_x, bottom_right_y)
     def get_players(self, display=False, threshold=0.37):
-        #top_left = (int(config['players']['top_x']), int(config['players']['top_y']))
-        #bottom_right = (int(config['players']['bottom_x']), int(config['players']['bottom_y']))
-        ## Remove here means that we remove the square that is made up of the given coordinates
-        #remove = True
-#
-        #locations = vision.match(div_folder + '/{}'.format("PlayerRef.jpg"),
-        #                         threshold, top_left, bottom_right, remove, display=display)
-#
-        #return locations
         players_pos = None
         nr_of_players = int(self.config["game"]["nr_players"])
         players_top_left = (int(self.config['players']['top_x']), int(self.config['players']['top_y']))
@@ -144,7 +139,6 @@ class Localizer:
 
     def get_dealer(self, display=False):
         dealer_pos = None
-        img = self.vision.window_capture()
         while dealer_pos is None:
             img = self.vision.window_capture()
             dealer_pos = self.vision.match(img, self.div_folder + '/Dealer.jpg', 0.85, display=display)

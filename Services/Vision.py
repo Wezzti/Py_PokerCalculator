@@ -82,6 +82,7 @@ class Vision:
         haystack_img = self.window_capture()
         for location in locations:
             loc_array = location.flatten()
+
             cv.rectangle(haystack_img, (loc_array[0], loc_array[1]), (loc_array[2], loc_array[3]), color=line_color,
                          thickness=thickness, lineType=line_type)
 
